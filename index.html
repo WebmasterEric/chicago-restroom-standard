@@ -1,22 +1,593 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Chicago Commercial Restroom Standard – CRC Score</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Chicago Commercial Restroom Standard and CRC Score – a public benchmark and scoring tool for commercial restroom cleaning in Chicago, plus a $29 Bathroom Cleaning Ticket for Chicago buildings.">
+  <style>
+    :root {
+      --bg: #050510;
+      --card-bg: #111222;
+      --accent: #ff5a5f;
+      --accent-soft: rgba(255, 90, 95, 0.12);
+      --text-main: #f5f5ff;
+      --text-muted: #a3a3c2;
+      --border-subtle: #26263a;
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.55);
+      --radius-card: 18px;
+      --radius-pill: 999px;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--font-main);
+      background: radial-gradient(circle at top, #181835 0, #050510 55%);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 16px 40px;
+    }
+
+    header {
+      padding: 28px 0 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    header h1 {
+      font-size: 1.9rem;
+      margin: 0 0 6px;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--text-muted);
+      max-width: 560px;
+    }
+
+    main {
+      padding-top: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      margin: 0 0 6px;
+    }
+
+    p {
+      margin: 0 0 10px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-card);
+      padding: 18px 16px 18px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .badge span {
+      font-size: 0.9rem;
+    }
+
+    .highlight {
+      color: #ffffff;
+      font-weight: 500;
+    }
+
+    .list {
+      padding-left: 18px;
+      margin: 4px 0 8px;
+    }
+
+    .list li {
+      margin-bottom: 4px;
+    }
+
+    .pill-row {
+      margin-top: 4px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-right: 4px;
+      margin-bottom: 4px;
+    }
+
+    .crc-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
+      margin-bottom: 10px;
+    }
+
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    label {
+      font-size: 0.9rem;
+    }
+
+    input[type="number"],
+    select {
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      background: #050512;
+      color: var(--text-main);
+      font-size: 0.95rem;
+    }
+
+    input[type="number"]:focus,
+    select:focus {
+      outline: 1px solid var(--accent);
+      outline-offset: 1px;
+      border-color: var(--accent);
+    }
+
+    small {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .btn-primary, .btn-secondary {
+      display: inline-block;
+      border-radius: var(--radius-pill);
+      padding: 9px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    .btn-primary {
+      border: none;
+      background: linear-gradient(135deg, var(--accent), #ffa15f);
+      color: #050510;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-secondary {
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--text-main);
+      margin-left: 4px;
+    }
+
+    .btn-primary:hover,
+    .btn-secondary:hover {
+      filter: brightness(1.05);
+    }
+
+    .crc-result {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .score-display {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 6px;
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .score-label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .score-tag {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      font-size: 0.8rem;
+    }
+
+    .score-green {
+      background: rgba(46, 204, 113, 0.15);
+      color: #2ecc71;
+      border: 1px solid rgba(46, 204, 113, 0.6);
+    }
+
+    .score-yellow {
+      background: rgba(241, 196, 15, 0.12);
+      color: #f1c40f;
+      border: 1px solid rgba(241, 196, 15, 0.6);
+    }
+
+    .score-red {
+      background: rgba(231, 76, 60, 0.15);
+      color: #e74c3c;
+      border: 1px solid rgba(231, 76, 60, 0.6);
+    }
+
+    .crc-summary {
+      font-size: 0.9rem;
+      margin-top: 6px;
+    }
+
+    .booking-cta {
+      margin-top: 14px;
+      padding: 10px 12px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .booking-cta h3 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+    }
+
+    .booking-cta p {
+      margin-bottom: 6px;
+    }
+
+    .booking-note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 14px 0 20px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: left;
+    }
+
+    footer a {
+      color: #ffb36a;
+    }
+
+    @media (max-width: 640px) {
+      header h1 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Chicago Commercial Restroom Standard</h1>
-  <p>This site will host the Chicago Restroom Compliance Score (CRC) and tools for commercial bathroom cleaning in Chicago.</p>
+  <div class="container">
+    <header>
+      <h1>Chicago Commercial Restroom Standard</h1>
+      <p>
+        A public benchmark for commercial restroom cleaning in Chicago, featuring the
+        <span class="highlight">Chicago Restroom Compliance Score (CRC)</span> and a simple way to start:
+        a $29 Bathroom Cleaning Ticket for Chicago buildings.
+      </p>
+    </header>
 
-  <h2>Start with a Bathroom Cleaning Ticket – $29 (Chicago Only)</h2>
-  <p>
-    <a href="https://store.webmastereric.com/product/bathroom-cleaning-ticket/" target="_blank" rel="noopener noreferrer">
-      Book a Bathroom Cleaning Ticket – $29
-    </a>
-  </p>
+    <main>
+      <section class="card">
+        <div class="badge">
+          <span>CHI</span> Chicago Benchmark · Restroom Operations
+        </div>
+        <h2>What is the Chicago Restroom Compliance Score (CRC)?</h2>
+        <p>
+          The <span class="highlight">CRC Score</span> is a simple way to rate how closely a commercial restroom
+          aligns with Chicago-grade expectations for cleanliness, frequency, and consistency.
+          It’s designed for real buildings, not theoretical checklists.
+        </p>
+        <p><strong>The CRC model looks at:</strong></p>
+        <ul class="list">
+          <li>Type of facility (office, restaurant, medical, retail, gym).</li>
+          <li>Daily restroom traffic and fixture counts.</li>
+          <li>Full-clean and touch-up frequency.</li>
+          <li>High-touch disinfection and odor control practices.</li>
+          <li>Deep-clean history and documentation quality.</li>
+        </ul>
+        <p>
+          Use the calculator below to generate a rough CRC Score (0–100) for your
+          current restroom operation.
+        </p>
+      </section>
 
-  <p>This is a simple placeholder. Next, we'll upgrade this into a full Chicago-branded CRC tool.</p>
+      <section class="card">
+        <h2>CRC Score Calculator (Quick Estimator)</h2>
+        <p>
+          This is a simplified, browser-only estimator. It doesn't store data and
+          is meant to give you a directional sense of where you stand today.
+        </p>
+
+        <form id="crc-form" class="crc-form">
+          <div class="form-row">
+            <label for="facility-type">Facility type</label>
+            <select id="facility-type">
+              <option value="office">Office / Corporate</option>
+              <option value="restaurant">Restaurant / Bar</option>
+              <option value="medical">Medical clinic</option>
+              <option value="retail">Retail / Mall</option>
+              <option value="gym">Gym / Fitness</option>
+              <option value="other">Other commercial</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label for="traffic-level">Traffic level per restroom (average)</label>
+            <select id="traffic-level">
+              <option value="low">Low (&lt; 50 visits/day)</option>
+              <option value="medium">Medium (50–200 visits/day)</option>
+              <option value="high">High (200–500 visits/day)</option>
+              <option value="very_high">Very high (500+ visits/day)</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label for="restroom-count">Number of restrooms in this building/zone</label>
+            <input type="number" id="restroom-count" min="1" value="2">
+          </div>
+
+          <div class="form-row">
+            <label for="full-cleans">Full cleans per day (per restroom)</label>
+            <input type="number" id="full-cleans" min="0" value="1">
+            <small>Full clean = toilets, sinks, floors, high-touch points, visual reset.</small>
+          </div>
+
+          <div class="form-row">
+            <label for="touchups">Touch-up passes per day (per restroom)</label>
+            <input type="number" id="touchups" min="0" value="1">
+            <small>Quick checks: trash, stock, obvious spills, odor check.</small>
+          </div>
+
+          <div class="form-row">
+            <label for="deep-days">Days since last deep clean (machine scrub, descale, etc.)</label>
+            <input type="number" id="deep-days" min="0" value="30">
+          </div>
+
+          <div class="form-row">
+            <label for="high-touch">High-touch disinfection frequency (per day)</label>
+            <input type="number" id="high-touch" min="0" value="2">
+          </div>
+
+          <div class="form-row">
+            <label for="odor-score">Odor control (1–5, 5 = always smells clean)</label>
+            <input type="number" id="odor-score" min="1" max="5" value="3">
+          </div>
+
+          <div class="form-row">
+            <label for="logs">Do you keep any kind of restroom log or documentation?</label>
+            <select id="logs">
+              <option value="yes">Yes – basic logs/checklists</option>
+              <option value="no">No – nothing written or tracked</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-primary">Calculate CRC Score</button>
+        </form>
+
+        <div id="crc-result" class="crc-result" style="display:none;">
+          <div class="score-display">
+            <span id="crc-score">0</span>
+            <span class="score-label">/ 100</span>
+            <span id="crc-tag" class="score-tag">–</span>
+          </div>
+          <p id="crc-summary" class="crc-summary"></p>
+
+          <div class="booking-cta">
+            <h3>Want a human to review your score?</h3>
+            <p>
+              If this score feels lower than you’d like — or even if it’s high and you
+              want to tighten the system — you can start with a simple, paid intake for
+              Chicago buildings:
+            </p>
+            <p>
+              <a
+                class="btn-primary"
+                href="https://store.webmastereric.com/product/bathroom-cleaning-ticket/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Book a Bathroom Cleaning Ticket – $29 (Chicago Only)
+              </a>
+            </p>
+            <p class="booking-note">
+              The Bathroom Cleaning Ticket covers one building or one restroom project in
+              the Chicago area. It’s not a contract or subscription—it’s a focused,
+              priority review built around your real numbers and conditions.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Who this Chicago standard is for</h2>
+        <p>
+          This benchmark is written with real buildings in mind, not theory. It’s for:
+        </p>
+        <ul class="list">
+          <li><strong>Chicago building owners & landlords</strong> who want fewer restroom complaints.</li>
+          <li><strong>Property & facility managers</strong> responsible for daily restroom operations.</li>
+          <li><strong>Commercial cleaning companies</strong> that want to prove they clean to a Chicago standard.</li>
+        </ul>
+        <p>
+          The goal is simple: give everyone the same language and expectations when
+          they talk about “good enough” vs “Chicago-ready” restroom cleaning.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>Why Chicago needs its own restroom standard</h2>
+        <p>
+          Chicago restrooms operate under conditions that generic national checklists rarely cover:
+        </p>
+        <ul class="list">
+          <li>High-density daily traffic through relatively small restroom footprints.</li>
+          <li>Weather-driven debris: salt, slush, rain, and dust tracked indoors.</li>
+          <li>Mixed-use buildings combining office, retail, food, and healthcare.</li>
+          <li>Tenants and customers with very low tolerance for “almost clean.”</li>
+        </ul>
+        <p>
+          This project treats commercial restroom cleaning as an operational system:
+          predictable, measurable, and designed for Chicago—not a generic template copied from somewhere else.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>Chicago Commercial Restroom Standard · Chicago, IL · Public benchmark project.</p>
+      <p>Bathroom Cleaning Ticket – $29 (Chicago only): <a href="https://store.webmastereric.com/product/bathroom-cleaning-ticket/" target="_blank" rel="noopener noreferrer">click here</a>.</p>
+    </footer>
+  </div>
+
+  <script>
+    function getRecommendedFrequencies(traffic) {
+      // Baseline recommended full cleans and touch-ups per day by traffic
+      switch (traffic) {
+        case "low":
+          return { full: 1, touchups: 1 };
+        case "medium":
+          return { full: 1, touchups: 2 };
+        case "high":
+          return { full: 2, touchups: 3 };
+        case "very_high":
+          return { full: 3, touchups: 4 };
+        default:
+          return { full: 1, touchups: 1 };
+      }
+    }
+
+    function classifyScore(score) {
+      if (score >= 85) return { label: "Chicago-ready", className: "score-green" };
+      if (score >= 60) return { label: "Needs improvement", className: "score-yellow" };
+      return { label: "At risk", className: "score-red" };
+    }
+
+    function buildSummary(score, facility, trafficLabel) {
+      if (score >= 85) {
+        return `This restroom program would generally be considered Chicago-ready for a ${facility} under ${trafficLabel} conditions. There is always room to refine, but the fundamentals appear strong.`;
+      }
+      if (score >= 60) {
+        return `This score suggests gaps in consistency or frequency. For a ${facility} with ${trafficLabel} traffic, you may be absorbing more risk than you realize in complaints, odor, and wear-and-tear.`;
+      }
+      return `This operation is likely under-serving the building. For a ${facility} with ${trafficLabel} traffic, this score would be considered at risk by Chicago standards, especially over time.`;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("crc-form");
+      const resultBlock = document.getElementById("crc-result");
+      const scoreEl = document.getElementById("crc-score");
+      const tagEl = document.getElementById("crc-tag");
+      const summaryEl = document.getElementById("crc-summary");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const facility = document.getElementById("facility-type").value;
+        const traffic = document.getElementById("traffic-level").value;
+        const trafficLabel = document.getElementById("traffic-level").selectedOptions[0].textContent;
+
+        const fullCleans = Number(document.getElementById("full-cleans").value || 0);
+        const touchups = Number(document.getElementById("touchups").value || 0);
+        const deepDays = Number(document.getElementById("deep-days").value || 0);
+        const highTouchFreq = Number(document.getElementById("high-touch").value || 0);
+        const odorScore = Number(document.getElementById("odor-score").value || 1);
+        const logs = document.getElementById("logs").value;
+
+        const rec = getRecommendedFrequencies(traffic);
+
+        let score = 100;
+
+        // Frequency penalties relative to recommended
+        if (fullCleans < rec.full) {
+          score -= (rec.full - fullCleans) * 10; // under-cleaning full cleans
+        }
+        if (touchups < rec.touchups) {
+          score -= (rec.touchups - touchups) * 5; // under-touching touch-ups
+        }
+
+        // Reward going above baseline slightly (but cap)
+        if (fullCleans > rec.full) {
+          score += Math.min((fullCleans - rec.full) * 3, 9);
+        }
+        if (touchups > rec.touchups) {
+          score += Math.min((touchups - rec.touchups) * 2, 8);
+        }
+
+        // Deep clean recency
+        if (deepDays > 30 && deepDays <= 60) {
+          score -= 5;
+        } else if (deepDays > 60 && deepDays <= 120) {
+          score -= 12;
+        } else if (deepDays > 120) {
+          score -= 20;
+        }
+
+        // High-touch frequency (Chicago really cares about this)
+        if (highTouchFreq < 1) {
+          score -= 15;
+        } else if (highTouchFreq < rec.touchups) {
+          score -= 8;
+        }
+
+        // Odor (1–5)
+        if (odorScore <= 2) {
+          score -= 15;
+        } else if (odorScore === 3) {
+          score -= 7;
+        } else if (odorScore === 4) {
+          score -= 2;
+        } // 5 = no penalty
+
+        // Documentation bonus
+        if (logs === "yes") {
+          score += 5;
+        } else {
+          score -= 5;
+        }
+
+        // Clamp score between 0 and 100
+        score = Math.max(0, Math.min(100, Math.round(score)));
+
+        const classification = classifyScore(score);
+
+        scoreEl.textContent = String(score);
+        tagEl.textContent = classification.label;
+        tagEl.className = "score-tag " + classification.className;
+        summaryEl.textContent = buildSummary(score, facility, trafficLabel);
+
+        resultBlock.style.display = "block";
+      });
+    });
+  </script>
 </body>
 </html>
